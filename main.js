@@ -369,17 +369,17 @@ class BasicWorldDemo {
     this.OnWindowResize_();
 
 
-    document.getElementById("fullscreen-button").addEventListener("click", function(){
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      } else if (document.documentElement.mozRequestFullScreen) {
-        document.documentElement.mozRequestFullScreen();
-      } else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.webkitRequestFullscreen();
-      } else if (document.documentElement.msRequestFullscreen) {
-        document.documentElement.msRequestFullscreen();
-      }
-    });
+    // document.getElementById("fullscreen-button").addEventListener("click", function(){
+    //   if (document.documentElement.requestFullscreen) {
+    //     document.documentElement.requestFullscreen();
+    //   } else if (document.documentElement.mozRequestFullScreen) {
+    //     document.documentElement.mozRequestFullScreen();
+    //   } else if (document.documentElement.webkitRequestFullscreen) {
+    //     document.documentElement.webkitRequestFullscreen();
+    //   } else if (document.documentElement.msRequestFullscreen) {
+    //     document.documentElement.msRequestFullscreen();
+    //   }
+    // });
   }
 
   OnWindowResize_() {
@@ -458,7 +458,7 @@ class BasicWorldDemo {
       this.swipeDown = false;
     }
 
-    if ((this.shoogaGlider_.gameOver || this.player_.gameOver) && !this.gameOver_) {
+    if ((this.shoogaGlider_.gameOver || this.player_.gameOver || this.progression_.gameOver) && !this.gameOver_) {
       this.gameOver_ = true;
       document.getElementById('game-over').classList.toggle('active');
       this.intervalId_ = setInterval(() => {
