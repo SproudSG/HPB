@@ -1,18 +1,14 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 
-import { math } from './math.js';
-
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
 
 
-export const world = (() => {
-
-  const START_POS = 100;
-  const START_POS2 = -4;
-  const SEPARATION_DISTANCE = 40;
+export const drinks = (() => {
 
 
-  class WorldObject {
+
+
+  class DrinksObject {
     constructor(params) {
       this.position = new THREE.Vector3(0, -2, 0);
       this.quaternion = new THREE.Quaternion();
@@ -45,42 +41,42 @@ export const world = (() => {
       //texture.encoding = THREE.sRGBEncoding;
 
       const drinks = [
-        "crow.fbx"
+        "coke.fbx"
       ];
 
 
       const randomizedDrinks = this.shuffleArray(drinks)
 
-      // const randomIndex = Math.floor(Math.random() * drinks.length);
-      // const fileName = drinks[randomIndex];
+      const randomIndex = Math.floor(Math.random() * drinks.length);
+      const fileName = drinks[randomIndex];
 
-      // const fbxLoader = new FBXLoader();
-      // const objects = [];
-      // fbxLoader.setPath('./resources/Creatures/FBX/');
+      const fbxLoader = new FBXLoader();
+      const objects = [];
+      fbxLoader.setPath('./resources/Creatures/FBX/');
 
-      // const loadModels = (model1, model2, model3) => {
-      //   fbxLoader.load(model1, object => {
-      //     objects.push(object);
-      //     object.scale.set(0.01, 0.01, 0.01);
-      //     this.params_.scene.add(object);
-      //   });
+      const loadModels = (model1, model2, model3) => {
+        fbxLoader.load(model1, object => {
+          objects.push(object);
+          object.scale.set(0.01, 0.01, 0.01);
+          this.params_.scene.add(object);
+        });
 
-      //   fbxLoader.load(model2, object => {
-      //     objects.push(object);
-      //     object.scale.set(0.01, 0.01, 0.01);
+        fbxLoader.load(model2, object => {
+          objects.push(object);
+          object.scale.set(0.01, 0.01, 0.01);
 
-      //     this.params_.scene.add(object);
-      //   });
+          this.params_.scene.add(object);
+        });
 
-      //   fbxLoader.load(model3, object => {
-      //     objects.push(object);
-      //     object.scale.set(0.01, 0.01, 0.01);
+        fbxLoader.load(model3, object => {
+          objects.push(object);
+          object.scale.set(0.01, 0.01, 0.01);
 
-      //     this.params_.scene.add(object);
-      //   });
-      // };
+          this.params_.scene.add(object);
+        });
+      };
 
-      // loadModels(drinks[0], drinks[1], drinks[2]);
+      loadModels(drinks[0], drinks[1], drinks[2]);
 
 
       const loader = new FBXLoader();
@@ -108,7 +104,7 @@ export const world = (() => {
     }
   }
 
-  class WorldManager {
+  class DrinksManager {
     constructor(params) {
       this.objects_ = [];
       this.unused_ = [];
@@ -141,7 +137,7 @@ export const world = (() => {
         obj = this.unused_.pop();
         obj.mesh.visible = true;
       } else {
-        obj = new WorldObject(this.params_);
+        obj = new DrinksObject(this.params_);
       }
       //obj = new WorldObject(this.params_);
       const MAX_DISTANCE_X = 100;
@@ -237,6 +233,6 @@ export const world = (() => {
   };
 
   return {
-    WorldManager: WorldManager,
+    DrinksManager: DrinksManager,
   };
 })();

@@ -146,7 +146,7 @@ export const player = (() => {
     // }
 
     CheckCollisions_() {
-      const colliders = this.params_.world.GetColliders();
+      const colliders = this.params_.shoogaGlider.GetColliders();
 
       this.playerBox_.setFromObject(this.mesh_);
 

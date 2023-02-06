@@ -11,6 +11,8 @@ body {
   overscroll-behavior: none;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-y: hidden;
+
 }
 
 .container {

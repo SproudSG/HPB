@@ -3,8 +3,9 @@ import Stats from 'https://cdnjs.cloudflare.com/ajax/libs/stats.js/17/Stats.js'
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
 
 import { player } from './player.js';
-import { world } from './world.js';
+import { shoogaGlider } from './shoogaGlider.js';
 import { background } from './background.js';
+import { progression } from './progression.js';
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -357,9 +358,10 @@ class BasicWorldDemo {
     });
     this.scene_.add(new THREE.Mesh(skyGeo, skyMat));
 
-    this.world_ = new world.WorldManager({ scene: this.scene_ });
-    this.player_ = new player.Player({ scene: this.scene_, world: this.world_ });
+    this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
+    this.player_ = new player.Player({ scene: this.scene_, shoogaGlider: this.shoogaGlider_ });
     this.background_ = new background.Background({ scene: this.scene_ });
+    this.progression_ = new progression.ProgressionManager();
 
     this.gameOver_ = false;
     this.previousRAF_ = null;
@@ -407,8 +409,9 @@ class BasicWorldDemo {
       return;
     }
     this.player_.Update(timeElapsed);
-    this.world_.Update(timeElapsed);
+    this.shoogaGlider_.Update(timeElapsed);
     this.background_.Update(timeElapsed);
+    this.progression_.Update(timeElapsed);
 
 
     if (this.swipeLeft) {
@@ -442,7 +445,7 @@ class BasicWorldDemo {
       this.swipeDown = false;
     }
 
-    if ((this.world_.gameOver || this.player_.gameOver) && !this.gameOver_) {
+    if ((this.shoogaGlider_.gameOver || this.player_.gameOver) && !this.gameOver_) {
       this.gameOver_ = true;
       document.getElementById('game-over').classList.toggle('active');
       this.intervalId_ = setInterval(() => {
