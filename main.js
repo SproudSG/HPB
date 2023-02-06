@@ -146,11 +146,11 @@ class BasicWorldDemo {
     this.isSwiping = false;
     document.addEventListener('touchstart', (event) => {
       this.handleTouchStart(event);
-    });
+    }, {passive: false});
 
     document.addEventListener('touchmove', (event) => {
       this.handleTouchMove(event);
-    });
+    }, {passive: false});
 
 
   }
