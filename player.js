@@ -14,8 +14,9 @@ export const player = (() => {
       this.jumping_ = false;
       this.inAir_ = false;
       this.sliding_ = false;
-
+      this.slideAnimation_ = false;
       this.playerBox_ = new THREE.Box3();
+      this.stamina_ = 100;
 
       this.params_ = params;
 
@@ -26,7 +27,7 @@ export const player = (() => {
     LoadModel_() {
       const loader = new FBXLoader();
       loader.setPath('./resources/Player/FBX/');
-      loader.load('baileyruncycle.fbx', (fbx) => {
+      loader.load('baileycompile.fbx', (fbx) => {
         fbx.scale.setScalar(0.01);
         fbx.quaternion.setFromAxisAngle(
           new THREE.Vector3(0, 1, 0), Math.PI / 2);
@@ -72,6 +73,41 @@ export const player = (() => {
       });
     }
 
+    UpdateAnimations_() {
+      if (!this.mixer_) {
+        return;
+
+      }
+
+      if (this.sliding_) {
+        for (let i = 0; i < this.mesh_.animations.length; ++i) {
+          if (this.mesh_.animations[i].name.includes('Slide')) {
+            const clip = this.mesh_.animations[i];
+            const action = this.mixer_.clipAction(clip);
+            action.play();
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+
+            action.onLoop = function (event) {
+              action.timeScale = 0;
+            };
+            break;
+          }
+        }
+      } else {
+        console.log('hi')
+        for (let i = 0; i < this.mesh_.animations.length; ++i) {
+          if (this.mesh_.animations[i].name.includes('Run')) {
+            const clip = this.mesh_.animations[i];
+            const action = this.mixer_.clipAction(clip);
+            action.play();
+            break;
+          }
+        }
+      }
+
+    }
+
     InitInput_() {
       this.keys_ = {
         left: false,
@@ -113,7 +149,19 @@ export const player = (() => {
           this.gameOver = true;
         }
       }
+
+      const water = this.params_.water.GetColliders();
+
+      for (let d of water) {
+        const cur = d.collider;
+
+        if (cur.intersectsBox(this.playerBox_)) {
+          this.stamina_ = this.stamina_ * 1.05;
+          this.params_.water.ToggleVisible();
+        }
+      }
     }
+
 
     //player movement with swipe gestures
     SwipeLeft() {
@@ -191,74 +239,26 @@ export const player = (() => {
     }
 
 
-    //player movement with keyboard controls
     Update(timeElapsed) {
+      //player movement with keyboard controls
       if (this.keys_.space && this.position_.y == 0.0) {
-        this.velocity_ = 30;
-        this.inAir_ = true;
-        var baileyYay = document.getElementById("bailey-yay");
-        baileyYay.play();
+        this.SwipeUp(timeElapsed)
+
       }
       if (this.keys_.down && this.position_.y == 0.0) {
-        this.velocity_ = 10;
-        this.sliding_ = true;
+        this.SwipeDown(timeElapsed)
       }
 
       if (!this.inAir_) {
         if (this.keys_.left) {
+          this.UpdateAnimations_()
+
           if (!this.keys_.right) {
-
-            if (this.position_.z <= 0) {
-              //if position is in the middle and left is pressed, character will go to the left as position_.z changes value by -0.3 which will execute this if statement until position_.z value is -3 (left).
-
-              this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
-              if (this.position_.z <= -3) {
-                this.position_.z = -3
-
-                this.keys_.left = false;
-              }
-
-            } else if (this.position_.z <= 3) {
-              //if position is in the right and left is pressed, character will go to the left as position_.z changes value by -0.3 which will execute this if statement until position_.z value is 0 (middle).
-
-              this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
-              if (this.position_.z == 0) {
-                this.keys_.left = false;
-              }
-
-            } else if (this.position_.z == -3) {
-              //if left is pressed when character is already left, nothing will happen
-              return;
-            }
-            var baileyWoo = document.getElementById("bailey-woo");
-            baileyWoo.play();
+            this.SwipeLeft()
           }
         }
         if (this.keys_.right) {
-          if (this.position_.z >= 0) {
-            //if position is in the middle and right is pressed, character will go to the right as position_.z changes value by +0.3 which will execute this if statement until position_.z value is 3 (right).
-
-            this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.rightMovementSpeed;
-            if (this.position_.z >= 3) {
-              this.position_.z = 3
-              this.keys_.right = false;
-            }
-
-          } else if (this.position_.z >= -3) {
-            //if position is in the left and right is pressed, character will go to the right as position_.z changes value by +0.3 which will execute this if statement until position_.z value is 0 (middle).
-
-            this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.rightMovementSpeed;
-            if (this.position_.z == 0) {
-              this.keys_.right = false;
-            }
-
-          } else if (this.position_.z == 3) {
-            //if left is pressed when character is already right, nothing will happen
-            return;
-          }
-          var baileyWoo = document.getElementById("bailey-woo");
-          baileyWoo.play();
-
+          this.SwipeRight()
 
         }
       }
@@ -291,7 +291,7 @@ export const player = (() => {
 
       }
       if (this.position_.y <= 0.0 && this.sliding_ == true) {
-        if(this.position_.y == 0){
+        if (this.position_.y == 0) {
           this.sliding_ = false
         }
       }
@@ -300,6 +300,21 @@ export const player = (() => {
         this.mixer_.update(timeElapsed);
         this.mesh_.position.copy(this.position_);
         this.CheckCollisions_();
+
+      }
+      this.UpdateStamina_(timeElapsed);
+
+    }
+
+    // Stamina
+    UpdateStamina_(timeElapsed) {
+      this.stamina_ -= timeElapsed * 5
+      const staminaText = (Math.round(this.stamina_ * 10) / 10).toLocaleString(
+        'en-US', { minimumIntegerDigits: 3, useGrouping: false });
+
+      document.getElementById("stamina").style.width = staminaText + "%"
+      if (this.stamina_ <= 0) {
+        this.gameOver = true
       }
     }
   };

@@ -6,6 +6,7 @@ import { player } from './player.js';
 import { shoogaGlider } from './shoogaGlider.js';
 import { background } from './background.js';
 import { progression } from './progression.js';
+import { water } from './water.js';
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -146,11 +147,11 @@ class BasicWorldDemo {
     this.isSwiping = false;
     document.addEventListener('touchstart', (event) => {
       this.handleTouchStart(event);
-    }, {passive: false});
+    }, { passive: false });
 
     document.addEventListener('touchmove', (event) => {
       this.handleTouchMove(event);
-    }, {passive: false});
+    }, { passive: false });
 
 
   }
@@ -206,7 +207,7 @@ class BasicWorldDemo {
         }
       }
     }
-  
+
   }
 
 
@@ -359,7 +360,8 @@ class BasicWorldDemo {
     this.scene_.add(new THREE.Mesh(skyGeo, skyMat));
 
     this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
-    this.player_ = new player.Player({ scene: this.scene_, shoogaGlider: this.shoogaGlider_ });
+    this.water_ = new water.DrinksManager({ scene: this.scene_ , position: 3 })
+    this.player_ = new player.Player({ scene: this.scene_, water: this.water_ , shoogaGlider: this.shoogaGlider_ });
     this.background_ = new background.Background({ scene: this.scene_ });
     this.progression_ = new progression.ProgressionManager();
 
@@ -413,7 +415,7 @@ class BasicWorldDemo {
     this.shoogaGlider_.Update(timeElapsed);
     this.background_.Update(timeElapsed);
     this.progression_.Update(timeElapsed);
-
+    this.water_.Update(timeElapsed)
 
     if (this.swipeLeft) {
       this.player_.SwipeLeft();
@@ -446,7 +448,7 @@ class BasicWorldDemo {
       this.swipeDown = false;
     }
 
-    if ((this.shoogaGlider_.gameOver || this.player_.gameOver || this.progression_.gameOver) && !this.gameOver_) {
+    if (this.player_.gameOver && !this.gameOver_) {
       this.gameOver_ = true;
       document.getElementById('game-over').classList.toggle('active');
       this.intervalId_ = setInterval(() => {

@@ -1,7 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 
-import { math } from './math.js';
-
 import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
 
 
@@ -21,6 +19,7 @@ export const shoogaGlider = (() => {
 
     }
 
+    // load the monster
     LoadModel_() {
 
       const loader = new FBXLoader();
@@ -82,7 +81,7 @@ export const shoogaGlider = (() => {
         }
 
         const MAX_DISTANCE_X = 100;
-        const MAX_DISTANCE_Z = 6;
+        const MAX_DISTANCE_Z = 1;
 
         // code below to set where the object is facing
         /*
@@ -93,7 +92,7 @@ export const shoogaGlider = (() => {
 
         obj.position.x = START_POS + Math.random() * MAX_DISTANCE_X;
         obj.position.z = START_POS2 + Math.random() * MAX_DISTANCE_Z;
-        obj.position.y -= timeElapsed ;
+        obj.position.y = -10 ;
         obj.scale = 0.02;
         this.objects_.push(obj);
 
