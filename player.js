@@ -15,16 +15,6 @@ export const player = (() => {
       this.inAir_ = false;
       this.sliding_ = false;
 
-      // this.mesh_ = new THREE.Mesh(
-      //     new THREE.BoxBufferGeometry(1, 1, 1),
-      //     new THREE.MeshStandardMaterial({
-      //         color: 0x80FF80,
-      //     }),
-      // );
-      // this.mesh_.castShadow = true;
-      // this.mesh_.receiveShadow = true;
-      // params.scene.add(this.mesh_);
-
       this.playerBox_ = new THREE.Box3();
 
       this.params_ = params;
@@ -89,6 +79,7 @@ export const player = (() => {
         space: false,
         down: false,
       };
+
       document.addEventListener('keydown', (event) => {
         if (event.keyCode === 37) {
           this.keys_.left = true;
@@ -100,12 +91,8 @@ export const player = (() => {
           this.keys_.down = true;
         }
       });
+
       document.addEventListener('keyup', (event) => {
-        // if (event.keyCode === 37) {
-        //   this.keys_.left = false;
-        // } else if (event.keyCode === 39) {
-        //   this.keys_.right = false;
-        // } else 
         if (event.keyCode === 32) {
           this.keys_.space = false;
         } else if (event.keyCode === 40) {
@@ -113,37 +100,6 @@ export const player = (() => {
         }
       });
     }
-
-    OnKeyDown_(event) {
-      switch (event.keyCode) {
-        case 32:
-          this.keys_.space = true;
-          break;
-        case 37: // left arrow key
-          this.keys_.left = true;
-          break;
-        case 39: // right arrow key
-          this.keys_.right = true;
-          break;
-        case 40: // down arrow key
-          this.keys_.down = true;
-          break;
-      }
-    }
-
-    // OnKeyUp_(event) {
-    //   switch (event.keyCode) {
-    //     case 32:
-    //       this.keys_.space = false;
-    //       break;
-    //     case 37: // left arrow key
-    //       this.keys_.left = false;
-    //       break;
-    //     case 39: // right arrow key
-    //       this.keys_.right = false;
-    //       break;
-    //   }
-    // }
 
     CheckCollisions_() {
       const colliders = this.params_.shoogaGlider.GetColliders();
@@ -160,37 +116,22 @@ export const player = (() => {
     }
 
     //player movement with swipe gestures
-
-
     SwipeLeft() {
 
 
       if (this.position_.z <= 0) {
-        //if position is in the middle and left is pressed, character will go to the left as position_.z changes value by -0.3 which will execute this if statement until position_.z value is -3 (left).
-
-
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
         if (this.position_.z <= -3) {
           this.position_.z = -3
-
-
           this.keys_.left = false;
         }
 
-
       } else if (this.position_.z <= 3) {
-        //if position is in the right and left is pressed, character will go to the left as position_.z changes value by -0.3 which will execute this if statement until position_.z value is 0 (middle).
-
-
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
         if (this.position_.z == 0) {
           this.keys_.left = false;
         }
-
-
       } else if (this.position_.z == -3) {
-        //if left is pressed when character is already left, nothing will happen
-        this.keys_.left = false;
         return;
       }
       var baileyWoo = document.getElementById("bailey-woo");
@@ -199,33 +140,23 @@ export const player = (() => {
 
 
     SwipeRight() {
-
       if (this.position_.z >= 0) {
-        //if position is in the middle and right is pressed, character will go to the right as position_.z changes value by +0.3 which will execute this if statement until position_.z value is 3 (right).
-
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.rightMovementSpeed;
         if (this.position_.z >= 3) {
           this.position_.z = 3
           this.keys_.right = false;
         }
-
       } else if (this.position_.z >= -3) {
-        //if position is in the left and right is pressed, character will go to the right as position_.z changes value by +0.3 which will execute this if statement until position_.z value is 0 (middle).
-
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.rightMovementSpeed;
         if (this.position_.z == 0) {
           this.keys_.right = false;
         }
-
       } else if (this.position_.z == 3) {
-        //if left is pressed when character is already right, nothing will happen
         return;
-        //this.keys_.right = false;
       }
       var baileyWoo = document.getElementById("bailey-woo");
       baileyWoo.play();
     }
-
 
 
     SwipeUp(timeElapsed) {
@@ -237,14 +168,11 @@ export const player = (() => {
       }
       if (this.inAir_) {
         const acceleration = -75 * timeElapsed;
-
         this.position_.y += timeElapsed * (this.velocity_ + acceleration * 0.5);
         this.position_.y = Math.max(this.position_.y, 0.0);
-
         this.velocity_ += acceleration;
         this.velocity_ = Math.max(this.velocity_, -100);
       }
-
     }
 
     SwipeDown(timeElapsed) {
@@ -252,21 +180,15 @@ export const player = (() => {
         this.velocity_ = 10;
         this.sliding_ = true;
       }
-
       if (this.sliding_) {
         const acceleration = -25 * timeElapsed;
-
         this.position_.y -= timeElapsed * (this.velocity_ + acceleration * 0.5);
         this.position_.y = Math.min(this.position_.y, 0.0);
         this.position_.y = Math.max(this.position_.y, -1.0);
-
         this.velocity_ += acceleration;
         this.velocity_ = Math.max(this.velocity_, -100);
       }
     }
-
-
-
 
 
     //player movement with keyboard controls
@@ -306,7 +228,6 @@ export const player = (() => {
 
             } else if (this.position_.z == -3) {
               //if left is pressed when character is already left, nothing will happen
-              this.keys_.left = false;
               return;
             }
             var baileyWoo = document.getElementById("bailey-woo");
@@ -334,7 +255,6 @@ export const player = (() => {
           } else if (this.position_.z == 3) {
             //if left is pressed when character is already right, nothing will happen
             return;
-            //this.keys_.right = false;
           }
           var baileyWoo = document.getElementById("bailey-woo");
           baileyWoo.play();
@@ -342,11 +262,6 @@ export const player = (() => {
 
         }
       }
-
-      //left and right calculation
-      const limit = 3;
-      this.position_.z = Math.max(this.position_.z, -limit);
-      this.position_.z = Math.min(this.position_.z, limit);
 
       //jump and slide calculation.
       if (this.inAir_) {
@@ -375,10 +290,10 @@ export const player = (() => {
         this.inAir_ = false;
 
       }
-      if (this.position_.y >= 0.0 && this.sliding_ == true) {
-        this.position_.y = 0
-
-        this.sliding_ = false
+      if (this.position_.y <= 0.0 && this.sliding_ == true) {
+        if(this.position_.y == 0){
+          this.sliding_ = false
+        }
       }
 
       if (this.mesh_) {
