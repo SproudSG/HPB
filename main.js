@@ -7,6 +7,8 @@ import { shoogaGlider } from './shoogaGlider.js';
 import { background } from './background.js';
 import { progression } from './progression.js';
 import { water } from './water.js';
+import { soda } from './soda.js';
+import { fruitDrink } from './fruitDrink.js';
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -342,14 +344,13 @@ class BasicWorldDemo {
       }, 10);
     });
 
-
-
     const uniforms = {
       topColor: { value: new THREE.Color(0x0077FF) },
       bottomColor: { value: new THREE.Color(0x89b2eb) },
       offset: { value: 33 },
       exponent: { value: 0.6 }
     };
+
     const skyGeo = new THREE.SphereBufferGeometry(1000, 32, 15);
     const skyMat = new THREE.ShaderMaterial({
       uniforms: uniforms,
@@ -357,11 +358,43 @@ class BasicWorldDemo {
       fragmentShader: _FS,
       side: THREE.BackSide,
     });
+
+  
     this.scene_.add(new THREE.Mesh(skyGeo, skyMat));
 
+
+
+    let arr1 = [];
+    let arr2 = [];
+    let arr3 = [];
+  
+    for (let i = 0; i < 6; i++) {
+      let value1 = Math.floor(Math.random() * 3) - 1;
+      let value2 = Math.floor(Math.random() * 3) - 1;
+      let value3 = Math.floor(Math.random() * 3) - 1;
+  
+      while (value1 === value2) {
+        value2 = Math.floor(Math.random() * 3) - 1;
+      }
+  
+      while (value1 === value3 || value2 === value3) {
+        value3 = Math.floor(Math.random() * 3) - 1;
+      }
+  
+      arr1.push(value1 * 3);
+      arr2.push(value2 * 3);
+      arr3.push(value3 * 3);
+    }
+  
+    
+
+
     this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
-    this.water_ = new water.DrinksManager({ scene: this.scene_ , position: 3 })
-    this.player_ = new player.Player({ scene: this.scene_, water: this.water_ , shoogaGlider: this.shoogaGlider_ });
+    this.water_ = new water.DrinksManager({ scene: this.scene_, position: arr1 })
+    this.soda_ = new soda.DrinksManager({ scene: this.scene_, position: arr2 })
+    this.fruitDrink_ = new fruitDrink.DrinksManager({ scene: this.scene_, position: arr3 })
+
+    this.player_ = new player.Player({ scene: this.scene_, water: this.water_, soda: this.soda_, fruitDrink: this.fruitDrink_, shoogaGlider: this.shoogaGlider_ });
     this.background_ = new background.Background({ scene: this.scene_ });
     this.progression_ = new progression.ProgressionManager();
 
@@ -416,6 +449,8 @@ class BasicWorldDemo {
     this.background_.Update(timeElapsed);
     this.progression_.Update(timeElapsed);
     this.water_.Update(timeElapsed)
+    this.soda_.Update(timeElapsed)
+    this.fruitDrink_.Update(timeElapsed)
 
     if (this.swipeLeft) {
       this.player_.SwipeLeft();

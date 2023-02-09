@@ -13,20 +13,43 @@ export const shoogaGlider = (() => {
       this.position = new THREE.Vector3(0, 0, 0);
       this.quaternion = new THREE.Quaternion();
       this.scale = 1.0;
+
       this.collider = new THREE.Box3();
       this.params_ = params;
       this.LoadModel_();
-
+      this.mixer = null;
+      this.actions = [];
     }
 
     // load the monster
     LoadModel_() {
 
       const loader = new FBXLoader();
-      loader.load('./resources/Creatures/FBX/crow.fbx', (fbx) => {
+      loader.load('./resources/Creatures/FBX/monster.fbx', (fbx) => {
         this.mesh = fbx;
+
+        //sets the texture
+        fbx.traverse((child) => {
+          if (child.isMesh) {
+
+            child.material.map = new THREE.TextureLoader().load('./resources/Creatures/textures/monster_albedo.jpg');
+
+          }
+        });
+
+        //add model to the scene
         this.params_.scene.add(this.mesh);
 
+        // Extract the animation clips from the fbx file
+        const animations = fbx.animations;
+        if (animations && animations.length > 0) {
+          this.mixer = new THREE.AnimationMixer(this.mesh);
+          for (let i = 0; i < animations.length; i++) {
+            const animation = animations[i];
+            const action = this.mixer.clipAction(animation);
+            this.actions.push(action);
+          }
+        }
       });
 
     }
@@ -35,7 +58,7 @@ export const shoogaGlider = (() => {
       this.collider.setFromObject(this.mesh);
     }
 
-    Update() {
+    Update(timeElapsed) {
       if (!this.mesh) {
         return;
       }
@@ -43,6 +66,15 @@ export const shoogaGlider = (() => {
       this.mesh.quaternion.copy(this.quaternion);
       this.mesh.scale.setScalar(this.scale);
       this.UpdateCollider_();
+
+      // play animation 
+      if (this.mixer) {
+        // Play the first animation in the list of actions
+        if (this.actions.length > 0) {
+          this.actions[0].play();
+        }
+        this.mixer.update(timeElapsed);
+      }
     }
   }
 
@@ -65,11 +97,9 @@ export const shoogaGlider = (() => {
 
       this.spawn_ += timeElapsed * 10.0;
 
-      console.log()
-
       const progress = Math.round(this.spawn_)
 
-      if (progress == 100 || progress == 200 || progress == 300 || progress == 400) {
+      if (progress == 50 || progress == 200 || progress == 300 || progress == 400) {
 
         let obj = null;
 
@@ -84,22 +114,24 @@ export const shoogaGlider = (() => {
         const MAX_DISTANCE_Z = 1;
 
         // code below to set where the object is facing
-        /*
+
         obj.quaternion.setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0), Math.random() * Math.PI * 2.0);
-          */
+          new THREE.Vector3(0, 1, 0), -Math.PI / 2);
 
 
+        //set shooga glider position abnd scale
         obj.position.x = START_POS + Math.random() * MAX_DISTANCE_X;
         obj.position.z = START_POS2 + Math.random() * MAX_DISTANCE_Z;
-        obj.position.y = -10 ;
-        obj.scale = 0.02;
+        obj.position.y = 4;
+        obj.scale = 0.03;
+
+
         this.objects_.push(obj);
 
+        //if more than one is generated, pop them so only one exists.
         if (this.objects_.length > 1) {
           while (this.objects_.length != 1) {
             this.objects_.pop();
-            console.log(this.objects_.length)
           }
         }
       }

@@ -7,6 +7,7 @@ export const player = (() => {
 
   class Player {
     constructor(params) {
+      //player properties
       this.position_ = new THREE.Vector3(0, 0, 0);
       this.velocity_ = 0.0;
       this.leftMovementSpeed = -0.3;
@@ -16,10 +17,26 @@ export const player = (() => {
       this.sliding_ = false;
       this.slideAnimation_ = false;
       this.playerBox_ = new THREE.Box3();
+
+      //water variables
+      this.waterID = null;
+      //this.prevWaterID = null;
+      //this.waterVisibilityID = 0;
+      this.processedWaterIDs = [];
+
+      //soda variables
+      this.sodaID = null;
+      this.processedSodaIDs = [];
+
+      //fruit drink variables
+      this.fruitID = null;
+      this.processedFruitIDs = [];
+
+      //sugarcrash variables
       this.stamina_ = 100;
+      this.sugarDrinks = 0;
 
       this.params_ = params;
-
       this.LoadModel_();
       this.InitInput_();
     }
@@ -36,12 +53,12 @@ export const player = (() => {
         this.params_.scene.add(this.mesh_);
 
         const texturePath = './resources/Player/textures/bailey/';
-        const texture1 = new THREE.TextureLoader().load(texturePath + 'clothes_Color.png');
-        const texture2 = new THREE.TextureLoader().load(texturePath + 'goggles_Color.png');
-        const texture3 = new THREE.TextureLoader().load(texturePath + 'hat_Color.png');
-        const texture4 = new THREE.TextureLoader().load(texturePath + 'skin_Color.png');
-        const texture5 = new THREE.TextureLoader().load(texturePath + 'hair_Color.png');
-        const texture6 = new THREE.TextureLoader().load(texturePath + 'boots_Color.png');
+        const texture1 = new THREE.TextureLoader().load(texturePath + 'clothes_Color.jpg');
+        const texture2 = new THREE.TextureLoader().load(texturePath + 'goggles_Color.jpg');
+        const texture3 = new THREE.TextureLoader().load(texturePath + 'hat_Color.jpg');
+        const texture4 = new THREE.TextureLoader().load(texturePath + 'skin_Color.jpg');
+        const texture5 = new THREE.TextureLoader().load(texturePath + 'hair_Color.jpg');
+        const texture6 = new THREE.TextureLoader().load(texturePath + 'boots_Color.jpg');
         fbx.traverse((child) => {
           if (child.isMesh) {
             if (child.name === "shirt_GEO" || child.name === "pants_GEO" || child.name === "bagback_GEO" || child.name === "bagfront_GEO" || child.name === "belt_GEO") {
@@ -79,32 +96,31 @@ export const player = (() => {
 
       }
 
-      if (this.sliding_) {
-        for (let i = 0; i < this.mesh_.animations.length; ++i) {
-          if (this.mesh_.animations[i].name.includes('Slide')) {
-            const clip = this.mesh_.animations[i];
-            const action = this.mixer_.clipAction(clip);
-            action.play();
-            action.setLoop(THREE.LoopOnce);
-            action.clampWhenFinished = true;
+      // if (this.sliding_) {
+      //   for (let i = 0; i < this.mesh_.animations.length; ++i) {
+      //     if (this.mesh_.animations[i].name.includes('Slide')) {
+      //       const clip = this.mesh_.animations[i];
+      //       const action = this.mixer_.clipAction(clip);
+      //       action.play();
+      //       action.setLoop(THREE.LoopOnce);
+      //       action.clampWhenFinished = true;
 
-            action.onLoop = function (event) {
-              action.timeScale = 0;
-            };
-            break;
-          }
-        }
-      } else {
-        console.log('hi')
-        for (let i = 0; i < this.mesh_.animations.length; ++i) {
-          if (this.mesh_.animations[i].name.includes('Run')) {
-            const clip = this.mesh_.animations[i];
-            const action = this.mixer_.clipAction(clip);
-            action.play();
-            break;
-          }
-        }
-      }
+      //       action.onLoop = function (event) {
+      //         action.timeScale = 0;
+      //       };
+      //       break;
+      //     }
+      //   }
+      // } else {
+      //   for (let i = 0; i < this.mesh_.animations.length; ++i) {
+      //     if (this.mesh_.animations[i].name.includes('Run')) {
+      //       const clip = this.mesh_.animations[i];
+      //       const action = this.mixer_.clipAction(clip);
+      //       action.play();
+      //       break;
+      //     }
+      //   }
+      // }
 
     }
 
@@ -137,12 +153,18 @@ export const player = (() => {
       });
     }
 
+    //checks if player collides with any other mesh
     CheckCollisions_() {
-      const colliders = this.params_.shoogaGlider.GetColliders();
+      const shoogaGlider = this.params_.shoogaGlider.GetColliders();
+      const water = this.params_.water.GetColliders();
+      const fruitDrink = this.params_.fruitDrink.GetColliders();
+      const soda = this.params_.soda.GetColliders();
+
 
       this.playerBox_.setFromObject(this.mesh_);
 
-      for (let c of colliders) {
+      //check for shooga glider monster collision
+      for (let c of shoogaGlider) {
         const cur = c.collider;
 
         if (cur.intersectsBox(this.playerBox_)) {
@@ -150,14 +172,89 @@ export const player = (() => {
         }
       }
 
-      const water = this.params_.water.GetColliders();
+      //if player collides with water
+      for (let c of water) {
+        // const cur = c.collider;
 
-      for (let d of water) {
-        const cur = d.collider;
+        // if (cur.intersectsBox(this.playerBox_)) {
+        //   this.waterID = c.mesh.uuid;
 
-        if (cur.intersectsBox(this.playerBox_)) {
-          this.stamina_ = this.stamina_ * 1.05;
-          this.params_.water.ToggleVisible();
+        //   var newStamina = this.stamina_ * 1.05;
+        //   newStamina = Math.min(newStamina, 100)
+        //   this.stamina_ = newStamina
+        //   this.params_.water.ToggleVisible(this.waterVisibilityID);
+
+        //   if (this.prevWaterID !== this.waterID) {
+        //     this.waterVisibilityID++;
+        //     this.prevWaterID = this.waterID;
+        //   }
+        // }
+
+        const cur = c.collider;
+        if (c.mesh) {
+          this.waterID = c.mesh.uuid;
+          if (!this.processedWaterIDs.includes(this.waterID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedWaterIDs.push(this.waterID);
+            var newStamina = this.stamina_ + 25;
+            newStamina = Math.min(newStamina, 100)
+            this.stamina_ = newStamina;
+            this.params_.water.ToggleVisible();
+          }
+        } else {
+          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
+        }
+      }
+
+      //if player collides with soda
+      for (let c of soda) {
+        const cur = c.collider;
+        if (c.mesh) {
+          this.sodaID = c.mesh.uuid;
+          if (!this.processedSodaIDs.includes(this.sodaID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedSodaIDs.push(this.sodaID);
+            var newStamina = this.stamina_ + 20;
+            newStamina = Math.min(newStamina, 100)
+            this.stamina_ = newStamina;
+            this.params_.soda.ToggleVisible();
+            this.sugarDrinks++
+            if(this.sugarDrinks == 3) {
+              console.log(this.stamina_)
+              newStamina = this.stamina_/2
+              console.log(newStamina)
+ 
+              this.stamina_ = newStamina;
+              this.sugarDrinks = 0
+            }
+          }
+        } else {
+          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
+        }
+      }
+
+      //if player collides with fruit drink
+      for (let c of fruitDrink) {
+        const cur = c.collider;
+        if (c.mesh) {
+          this.fruitID = c.mesh.uuid;
+          if (!this.processedFruitIDs.includes(this.fruitID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedFruitIDs.push(this.fruitID);
+            var newStamina = this.stamina_ + 20;
+            newStamina = Math.min(newStamina, 100)
+            this.stamina_ = newStamina;
+            this.params_.fruitDrink.ToggleVisible();
+            this.sugarDrinks++
+            if(this.sugarDrinks == 3) {
+              console.log(this.stamina_)
+
+              newStamina = this.stamina_/2
+              console.log(newStamina)
+
+              this.stamina_ = newStamina;
+              this.sugarDrinks = 0
+            }
+          }
+        } else {
+          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
         }
       }
     }
@@ -165,8 +262,7 @@ export const player = (() => {
 
     //player movement with swipe gestures
     SwipeLeft() {
-
-
+  
       if (this.position_.z <= 0) {
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
         if (this.position_.z <= -3) {
@@ -302,6 +398,8 @@ export const player = (() => {
         this.CheckCollisions_();
 
       }
+
+      //update stamina
       this.UpdateStamina_(timeElapsed);
 
     }

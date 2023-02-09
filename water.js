@@ -20,10 +20,20 @@ export const water = (() => {
     //load the drinks
     LoadModel_() {
 
+
+
       const loader = new FBXLoader();
-      loader.load('./resources/Creatures/FBX/fly.fbx', (fbx) => {
-        this.mesh = fbx;
+      loader.load('./resources/Drinks/drinks.fbx', (fbx) => {
+        this.mesh = fbx.children[0];
+        fbx.traverse((child) => {
+          if (child.isMesh) {
+
+            child.material.map = new THREE.TextureLoader().load('./resources/Drinks/textures/drinks_albedo.jpg');
+
+          }
+        });
         this.params_.scene.add(this.mesh);
+
 
       });
 
@@ -51,49 +61,50 @@ export const water = (() => {
       this.speed_ = 12;
       this.params_ = params;
       this.counter_ = 0;
+      this.visibilityCounter_ = 0
       this.spawn_ = 0;
+      this.progress_ = 0;
     }
 
     GetColliders() {
       return this.objects_;
     }
 
-    ToggleVisible(){
+    ToggleVisible(counter) {
+
+      //correction if statement
+      // if(counter != 0 ){
+      //   counter--
+      // }
+      // this.objects_[counter].mesh.visible = false;
       this.objects_[0].mesh.visible = false;
+
     }
 
-    SpawnObj_(position) {
+    SpawnObj_(position, timeElapsed) {
+      this.progress_ += timeElapsed * 10.0;
+
+      const spawnPosition = [50, 130, 210, 290, 370, 450]
+
       let obj = null;
-      if (this.counter_ == 0) {
-        this.counter_ = 1;
-        if (this.unused_.length > 0) {
-          obj = this.unused_.pop();
-          obj.mesh.visible = true;
-        } else {
+
+      for (var i = 0; i < spawnPosition.length; i++) {
+        if (this.counter_ == i) {
           obj = new DrinksObject(this.params_);
+
+          obj.position.x = spawnPosition[i]
+          obj.position.z = position[i]
+          obj.scale = 0.02;
+          this.objects_.push(obj);
+          this.counter_++
         }
-
-        const MAX_DISTANCE_X = 100;
-
-        // code below to set where the object is facing
-        /*
-        obj.quaternion.setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0), Math.random() * Math.PI * 2.0);
-          */
-
-
-        obj.position.x = 50 + Math.random() * MAX_DISTANCE_X //+ offset;
-        obj.position.z = position
-        obj.scale = 0.01;
-
-        this.objects_.push(obj);
       }
 
     }
 
 
     Update(timeElapsed) {
-      this.SpawnObj_(this.params_.position)
+      this.SpawnObj_(this.params_.position, timeElapsed)
       this.UpdateColliders_(timeElapsed);
 
     }
@@ -118,6 +129,7 @@ export const water = (() => {
       this.objects_ = visible;
       this.unused_.push(...invisible);
     }
+
 
   };
 
