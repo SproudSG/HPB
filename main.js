@@ -9,6 +9,7 @@ import { progression } from './progression.js';
 import { water } from './water.js';
 import { soda } from './soda.js';
 import { fruitDrink } from './fruitDrink.js';
+import { oilSlik } from './OilSlik.js';
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -395,6 +396,8 @@ class BasicWorldDemo {
     this.fruitDrink_ = new fruitDrink.DrinksManager({ scene: this.scene_, position: arr3 })
 
     this.player_ = new player.Player({ scene: this.scene_, water: this.water_, soda: this.soda_, fruitDrink: this.fruitDrink_, shoogaGlider: this.shoogaGlider_ });
+    this.oilSlik_ = new oilSlik.OilSlik({ scene: this.scene_ });
+
     this.background_ = new background.Background({ scene: this.scene_ });
     this.progression_ = new progression.ProgressionManager();
 
@@ -445,6 +448,8 @@ class BasicWorldDemo {
       return;
     }
     this.player_.Update(timeElapsed);
+    this.oilSlik_.Update(timeElapsed);
+
     this.shoogaGlider_.Update(timeElapsed);
     this.background_.Update(timeElapsed);
     this.progression_.Update(timeElapsed);

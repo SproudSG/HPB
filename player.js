@@ -20,8 +20,6 @@ export const player = (() => {
 
       //water variables
       this.waterID = null;
-      //this.prevWaterID = null;
-      //this.waterVisibilityID = 0;
       this.processedWaterIDs = [];
 
       //soda variables
@@ -174,21 +172,6 @@ export const player = (() => {
 
       //if player collides with water
       for (let c of water) {
-        // const cur = c.collider;
-
-        // if (cur.intersectsBox(this.playerBox_)) {
-        //   this.waterID = c.mesh.uuid;
-
-        //   var newStamina = this.stamina_ * 1.05;
-        //   newStamina = Math.min(newStamina, 100)
-        //   this.stamina_ = newStamina
-        //   this.params_.water.ToggleVisible(this.waterVisibilityID);
-
-        //   if (this.prevWaterID !== this.waterID) {
-        //     this.waterVisibilityID++;
-        //     this.prevWaterID = this.waterID;
-        //   }
-        // }
 
         const cur = c.collider;
         if (c.mesh) {
