@@ -5,9 +5,6 @@ import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm
 
 export const shoogaGlider = (() => {
 
-  const START_POS = 100;
-  const START_POS2 = -4;
-
   class ShoogaGliderObject {
     constructor(params) {
       this.position = new THREE.Vector3(0, 0, 0);
@@ -25,14 +22,14 @@ export const shoogaGlider = (() => {
     LoadModel_() {
 
       const loader = new FBXLoader();
-      loader.load('./resources/Creatures/FBX/monster.fbx', (fbx) => {
+      loader.load('./resources/Creatures/FBX/bateye.fbx', (fbx) => {
         this.mesh = fbx;
 
         //sets the texture
         fbx.traverse((child) => {
           if (child.isMesh) {
 
-            child.material.map = new THREE.TextureLoader().load('./resources/Creatures/textures/monster_albedo.jpg');
+            child.material.map = new THREE.TextureLoader().load('./resources/Creatures/textures/bateye_albedo.jpg');
 
           }
         });
@@ -83,6 +80,9 @@ export const shoogaGlider = (() => {
       this.objects_ = [];
       this.unused_ = [];
       this.speed_ = 52;
+      this.speedz_ = 1.5
+      this.speedy_ = 12
+
       this.params_ = params;
       this.counter_ = 0;
       this.spawn_ = 0;
@@ -95,44 +95,36 @@ export const shoogaGlider = (() => {
 
     SpawnObj_(timeElapsed) {
 
-      this.spawn_ += timeElapsed * 10.0;
+      this.progress_ += timeElapsed * 10.0;
 
-      const progress = Math.round(this.spawn_)
 
-      if (progress == 50 || progress == 200 || progress == 300 || progress == 400) {
+      const spawnPosition = [570, 1100, 1700 ]
 
-        let obj = null;
+      let obj = null;
 
-        if (this.unused_.length > 0) {
-          obj = this.unused_.pop();
-          obj.mesh.visible = true;
-        } else {
+      for (var i = 0; i < spawnPosition.length; i++) {
+        if (this.counter_ == i) {
+
           obj = new ShoogaGliderObject(this.params_);
-        }
-
-        const MAX_DISTANCE_X = 100;
-        const MAX_DISTANCE_Z = 1;
-
-        // code below to set where the object is facing
-
-        obj.quaternion.setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0), -Math.PI / 2);
 
 
-        //set shooga glider position abnd scale
-        obj.position.x = START_POS + Math.random() * MAX_DISTANCE_X;
-        obj.position.z = START_POS2 + Math.random() * MAX_DISTANCE_Z;
-        obj.position.y = 4;
-        obj.scale = 0.03;
+          // code below to set where the object is facing
+
+          obj.quaternion.setFromAxisAngle(
+            new THREE.Vector3(0, 1, 0), -Math.PI / 2);
 
 
-        this.objects_.push(obj);
+          //set shooga glider position abnd scale
+          obj.position.x = spawnPosition[i] + Math.random() 
+          obj.position.z = 0;
+          obj.position.y = 100;
+          obj.scale = 0.6;
 
-        //if more than one is generated, pop them so only one exists.
-        if (this.objects_.length > 1) {
-          while (this.objects_.length != 1) {
-            this.objects_.pop();
-          }
+          this.objects_.push(obj);
+
+    
+          this.counter_++
+
         }
       }
 
@@ -146,12 +138,27 @@ export const shoogaGlider = (() => {
 
     //sets the speed of the spawned monsters
     UpdateColliders_(timeElapsed) {
+      
       const invisible = [];
       const visible = [];
 
       for (let obj of this.objects_) {
         obj.position.x -= timeElapsed * this.speed_;
 
+        obj.position.z -= timeElapsed * this.speedz_;
+        obj.position.y -= timeElapsed * this.speedy_;
+
+        if (obj.position.z < -3 || obj.position.z > 3) {
+          this.speedz_ = -this.speedz_;
+          console.log(this.speedz_)
+
+        }
+        
+        if (obj.position.y < 2) {
+          this.speedy_ = 0
+
+        }
+        
         if (obj.position.x < -20) {
           invisible.push(obj);
           obj.mesh.visible = false;

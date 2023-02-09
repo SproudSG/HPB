@@ -201,7 +201,7 @@ export const player = (() => {
             this.params_.water.ToggleVisible();
           }
         } else {
-          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
+          return;
         }
       }
 
@@ -227,7 +227,7 @@ export const player = (() => {
             }
           }
         } else {
-          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
+          return;
         }
       }
 
@@ -254,7 +254,7 @@ export const player = (() => {
             }
           }
         } else {
-          console.error('Cannot read property "uuid" of undefined (reading "c.mesh.uuid")');
+          return;
         }
       }
     }
