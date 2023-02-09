@@ -42,7 +42,7 @@ export const player = (() => {
     LoadModel_() {
       const loader = new FBXLoader();
       loader.setPath('./resources/Player/FBX/');
-      loader.load('baileycompile.fbx', (fbx) => {
+      loader.load('baileyGeo2.fbx', (fbx) => {
         fbx.scale.setScalar(0.01);
         fbx.quaternion.setFromAxisAngle(
           new THREE.Vector3(0, 1, 0), Math.PI / 2);
@@ -178,7 +178,7 @@ export const player = (() => {
           this.waterID = c.mesh.uuid;
           if (!this.processedWaterIDs.includes(this.waterID) && cur.intersectsBox(this.playerBox_)) {
             this.processedWaterIDs.push(this.waterID);
-            var newStamina = this.stamina_ + 25;
+            var newStamina = this.stamina_ + 35;
             newStamina = Math.min(newStamina, 100)
             this.stamina_ = newStamina;
             this.params_.water.ToggleVisible();

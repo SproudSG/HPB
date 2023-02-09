@@ -23,7 +23,9 @@ export const water = (() => {
 
 
       const loader = new FBXLoader();
-      loader.load('./resources/Drinks/drinks.fbx', (fbx) => {
+      loader.setPath('./resources/Drinks/');
+
+      loader.load('drinks2.fbx', (fbx) => {
         this.mesh = fbx.children[0];
         fbx.traverse((child) => {
           if (child.isMesh) {

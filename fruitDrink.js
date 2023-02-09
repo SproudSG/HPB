@@ -20,10 +20,10 @@ export const fruitDrink = (() => {
     //load the drinks
     LoadModel_() {
 
-
-
       const loader = new FBXLoader();
-      loader.load('./resources/Drinks/drinks.fbx', (fbx) => {
+      loader.setPath('./resources/Drinks/');
+
+      loader.load('drinks2.fbx', (fbx) => {
 
         this.mesh = fbx.children[8];
         this.params_.scene.add(this.mesh);

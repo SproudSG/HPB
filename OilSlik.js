@@ -10,6 +10,7 @@ export const oilSlik = (() => {
             //player properties
             this.position_ = new THREE.Vector3(-2, 0, 0);
             this.playerBox_ = new THREE.Box3();
+            this.speed_ = 2;
 
 
             this.params_ = params;
@@ -52,6 +53,7 @@ export const oilSlik = (() => {
                 this.mixer_.update(timeElapsed);
                 this.mesh_.position.copy(this.position_);
                 this.CheckCollisions_();
+                // this.mesh_.position.x = timeElapsed * this.speed_;
 
             }
 

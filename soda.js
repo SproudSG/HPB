@@ -23,7 +23,9 @@ export const soda = (() => {
 
 
       const loader = new FBXLoader();
-      loader.load('./resources/Drinks/drinks.fbx', (fbx) => {
+      loader.setPath('./resources/Drinks/');
+
+      loader.load('drinks2.fbx', (fbx) => {
         this.mesh = fbx.children[2];
         this.params_.scene.add(this.mesh);
         const waterTexture = new THREE.TextureLoader().load('./resources/Drinks/textures/drinks_albedo.jpg');

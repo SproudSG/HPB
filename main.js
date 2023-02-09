@@ -127,6 +127,7 @@ return PCSS( shadowMap, shadowCoord );
 class BasicWorldDemo {
   constructor() {
     this.countdown_ = 6;
+    this.loaded = false;
     this.intervalId_ = null;
     this._Initialize();
     this._gameStarted = false;
@@ -134,6 +135,7 @@ class BasicWorldDemo {
     this._playMenuMusic();
     document.addEventListener('DOMContentLoaded', () => {
       this._playMenuMusic();
+
     });
     document.getElementById('game-menu').onclick = (msg) => this._OnStart(msg);
 
@@ -164,6 +166,7 @@ class BasicWorldDemo {
   }
 
   _OnStart(msg) {
+    console.log(msg)
     this.menuMusic.pause();
     document.getElementById('game-menu').style.display = 'none';
     this._gameStarted = true;
@@ -275,21 +278,11 @@ class BasicWorldDemo {
     light.shadow.camera.bottom = -50;
     this.scene_.add(light);
 
-    light = new THREE.HemisphereLight(0x202020, 0x004080, 0.4);
+    light = new THREE.HemisphereLight(0x202020, 0x004080, 0.6);
     this.scene_.add(light);
 
     this.scene_.background = new THREE.Color(0x808080);
     this.scene_.fog = new THREE.FogExp2(0x89b2eb, 0.00125);
-
-    // const ground = new THREE.Mesh(
-    //     new THREE.PlaneGeometry(20000, 20000, 10, 10),
-    //     new THREE.MeshStandardMaterial({
-    //         color: 0xf6f47f,
-    //       }));
-    // ground.castShadow = false;
-    // ground.receiveShadow = true;
-    // ground.rotation.x = -Math.PI / 2;
-    // this.scene_.add(ground);
 
     const loader = new FBXLoader();
     loader.setPath('./resources/Map/FBX/');
@@ -360,7 +353,7 @@ class BasicWorldDemo {
       side: THREE.BackSide,
     });
 
-  
+
     this.scene_.add(new THREE.Mesh(skyGeo, skyMat));
 
 
@@ -368,26 +361,26 @@ class BasicWorldDemo {
     let arr1 = [];
     let arr2 = [];
     let arr3 = [];
-  
+
     for (let i = 0; i < 6; i++) {
       let value1 = Math.floor(Math.random() * 3) - 1;
       let value2 = Math.floor(Math.random() * 3) - 1;
       let value3 = Math.floor(Math.random() * 3) - 1;
-  
+
       while (value1 === value2) {
         value2 = Math.floor(Math.random() * 3) - 1;
       }
-  
+
       while (value1 === value3 || value2 === value3) {
         value3 = Math.floor(Math.random() * 3) - 1;
       }
-  
+
       arr1.push(value1 * 3);
       arr2.push(value2 * 3);
       arr3.push(value3 * 3);
     }
-  
-    
+
+
 
 
     this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
@@ -445,11 +438,18 @@ class BasicWorldDemo {
       this.eventAdded = true;
     }
     if (this.gameOver_ || !this._gameStarted) {
+      if(!this.loaded){
+        this.water_.Update(timeElapsed)
+        this.soda_.Update(timeElapsed)
+        this.fruitDrink_.Update(timeElapsed)
+        this.shoogaGlider_.Update(timeElapsed);
+        this.loaded = true;
+        console.log("hi")
+      }
       return;
     }
     this.player_.Update(timeElapsed);
     this.oilSlik_.Update(timeElapsed);
-
     this.shoogaGlider_.Update(timeElapsed);
     this.background_.Update(timeElapsed);
     this.progression_.Update(timeElapsed);
@@ -511,8 +511,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom )
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
 
 function animate() {
 
@@ -522,8 +522,8 @@ function animate() {
 
   stats.end();
 
-  requestAnimationFrame( animate );
+  requestAnimationFrame(animate);
 
 }
 
-requestAnimationFrame( animate );
+requestAnimationFrame(animate);

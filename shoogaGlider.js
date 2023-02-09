@@ -22,7 +22,7 @@ export const shoogaGlider = (() => {
     LoadModel_() {
 
       const loader = new FBXLoader();
-      loader.load('./resources/Creatures/FBX/bateye.fbx', (fbx) => {
+      loader.load('./resources/Creatures/FBX/bateye2.fbx', (fbx) => {
         this.mesh = fbx;
 
         //sets the texture
@@ -80,7 +80,7 @@ export const shoogaGlider = (() => {
       this.objects_ = [];
       this.unused_ = [];
       this.speed_ = 52;
-      this.speedz_ = 1.5
+      this.speedz_ = 6
       this.speedy_ = 12
 
       this.params_ = params;
