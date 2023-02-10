@@ -9,6 +9,9 @@ import { progression } from './progression.js';
 import { water } from './water.js';
 import { soda } from './soda.js';
 import { fruitDrink } from './fruitDrink.js';
+import { hpbLogo } from './boxHPB.js';
+import { hpbWrongLogo1 } from './boxWrong1.js';
+import { hpbWrongLogo2 } from './boxWrong2.js';
 import { oilSlik } from './OilSlik.js';
 
 const _VS = `
@@ -150,6 +153,9 @@ class BasicWorldDemo {
     this.endY = 0;
     this.minDistance = 100;
     this.isSwiping = false;
+    this.isPaused = false;
+
+
     document.addEventListener('touchstart', (event) => {
       this.handleTouchStart(event);
     }, { passive: false });
@@ -166,13 +172,13 @@ class BasicWorldDemo {
   }
 
   _OnStart(msg) {
-    console.log(msg)
     this.menuMusic.pause();
     document.getElementById('game-menu').style.display = 'none';
     this._gameStarted = true;
     var gameMusic = document.getElementById("game-music");
     gameMusic.play();
   }
+
 
   //swipe gestures, properties: swipe atleast 100 pixels to activate, cannot execute if user holds down on the swipe.
 
@@ -198,18 +204,14 @@ class BasicWorldDemo {
       if (absDeltaX > absDeltaY) {
         if (deltaX > 0) {
           this.swipeRight = true;
-          console.log('Right swipe detected');
         } else {
           this.swipeLeft = true;
-          console.log('Left swipe detected');
         }
       } else {
         if (deltaY > 0) {
           this.swipeDown = true;
-          console.log('Down swipe detected');
         } else {
           this.swipeUp = true;
-          console.log('Up swipe detected');
         }
       }
     }
@@ -218,6 +220,13 @@ class BasicWorldDemo {
 
 
   _Initialize() {
+    //speed
+    this.speed_ = 0.22
+    this.objSpeed = 12
+    this.monSpeed = 52
+    this.speedz = 6
+    this.speedy = 12
+
     // overwrite shadowmap code
     let shadowCode = THREE.ShaderChunk.shadowmap_pars_fragment;
 
@@ -263,22 +272,15 @@ class BasicWorldDemo {
 
     this.scene_ = new THREE.Scene();
 
-    let light = new THREE.DirectionalLight(0xFFFFFF, 2);
-    light.position.set(60, 100, 10);
-    light.target.position.set(40, 0, 0);
-    light.castShadow = true;
-    light.shadow.bias = -0.001;
-    light.shadow.mapSize.width = 4096;
-    light.shadow.mapSize.height = 4096;
-    light.shadow.camera.far = 200.0;
-    light.shadow.camera.near = 1.0;
-    light.shadow.camera.left = 50;
-    light.shadow.camera.right = -50;
-    light.shadow.camera.top = 50;
-    light.shadow.camera.bottom = -50;
+    let light = new THREE.DirectionalLight(0xffffff, 1);
+
     this.scene_.add(light);
 
-    light = new THREE.HemisphereLight(0x202020, 0x004080, 0.6);
+    light = new THREE.HemisphereLight(0x202020, 0x004080, 1.5);
+    this.scene_.add(light);
+
+    light = new THREE.PointLight(0xb6bfcc, 1.5, 200, 4);
+    light.position.set(-7, 20, 0);
     this.scene_.add(light);
 
     this.scene_.background = new THREE.Color(0x808080);
@@ -317,9 +319,30 @@ class BasicWorldDemo {
       let animationId;
       let animationStarted = false;
 
+      //key down event listener
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          if (this.isPaused) {
+            animationId = requestAnimationFrame(animate);
+            this.objSpeed = 12
+            this.monSpeed = 52
+            this.speedy = 12
+            this.speedz = 6
+            this.isPaused = false;
+          } else {
+            this.objSpeed = 0
+            this.monSpeed = 0
+            this.speedy = 0
+            this.speedz = 0
+            cancelAnimationFrame(animationId);
+            this.isPaused = true;
+          }
+        }
+      });
+
       const animate = () => {
         if (this._gameStarted) {
-          const speed = 0.22;
+          const speed = this.speed_
           this.mesh.position.x -= speed;
         }
         if (this.gameOver_) {
@@ -357,10 +380,10 @@ class BasicWorldDemo {
     this.scene_.add(new THREE.Mesh(skyGeo, skyMat));
 
 
-
-    let arr1 = [];
-    let arr2 = [];
-    let arr3 = [];
+    // set randonm positoin for drinks
+    let arrDrinks1 = [];
+    let arrDrinks2 = [];
+    let arrDrinks3 = [];
 
     for (let i = 0; i < 6; i++) {
       let value1 = Math.floor(Math.random() * 3) - 1;
@@ -375,26 +398,51 @@ class BasicWorldDemo {
         value3 = Math.floor(Math.random() * 3) - 1;
       }
 
-      arr1.push(value1 * 3);
-      arr2.push(value2 * 3);
-      arr3.push(value3 * 3);
+      arrDrinks1.push(value1 * 3);
+      arrDrinks2.push(value2 * 3);
+      arrDrinks3.push(value3 * 3);
     }
 
 
+    // set randonm positoin for box logos
+    let arrLogo1 = [];
+    let arrLogo2 = [];
+    let arrLogo3 = [];
+
+    for (let i = 0; i < 3; i++) {
+      let value1 = Math.floor(Math.random() * 3) - 1;
+      let value2 = Math.floor(Math.random() * 3) - 1;
+      let value3 = Math.floor(Math.random() * 3) - 1;
+
+      while (value1 === value2) {
+        value2 = Math.floor(Math.random() * 3) - 1;
+      }
+
+      while (value1 === value3 || value2 === value3) {
+        value3 = Math.floor(Math.random() * 3) - 1;
+      }
+
+      arrLogo1.push(value1 * 3);
+      arrLogo2.push(value2 * 3);
+      arrLogo3.push(value3 * 3);
+    }
 
 
     this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
-    this.water_ = new water.DrinksManager({ scene: this.scene_, position: arr1 })
-    this.soda_ = new soda.DrinksManager({ scene: this.scene_, position: arr2 })
-    this.fruitDrink_ = new fruitDrink.DrinksManager({ scene: this.scene_, position: arr3 })
+    this.water_ = new water.DrinksManager({ scene: this.scene_, position: arrDrinks1 })
+    this.soda_ = new soda.DrinksManager({ scene: this.scene_, position: arrDrinks2 })
+    this.fruitDrink_ = new fruitDrink.DrinksManager({ scene: this.scene_, position: arrDrinks3 })
+    this.hpbLogo_ = new hpbLogo.BoxManager({ scene: this.scene_, position: arrLogo1 })
+    this.hpbWrongLogo1_ = new hpbWrongLogo1.BoxManager({ scene: this.scene_, position: arrLogo2 })
+    this.hpbWrongLogo2_ = new hpbWrongLogo2.BoxManager({ scene: this.scene_, position: arrLogo3 })
 
-    this.player_ = new player.Player({ scene: this.scene_, water: this.water_, soda: this.soda_, fruitDrink: this.fruitDrink_, shoogaGlider: this.shoogaGlider_ });
+    this.player_ = new player.Player({ scene: this.scene_, water: this.water_, soda: this.soda_, fruitDrink: this.fruitDrink_, shoogaGlider: this.shoogaGlider_, box1: this.hpbLogo_, box2: this.hpbWrongLogo1_, box3: this.hpbWrongLogo2_ });
     this.oilSlik_ = new oilSlik.OilSlik({ scene: this.scene_ });
-
     this.background_ = new background.Background({ scene: this.scene_ });
     this.progression_ = new progression.ProgressionManager();
 
     this.gameOver_ = false;
+    this.isPaused_ = false;
     this.previousRAF_ = null;
     this.RAF_();
     this.OnWindowResize_();
@@ -438,24 +486,38 @@ class BasicWorldDemo {
       this.eventAdded = true;
     }
     if (this.gameOver_ || !this._gameStarted) {
-      if(!this.loaded){
-        this.water_.Update(timeElapsed)
-        this.soda_.Update(timeElapsed)
-        this.fruitDrink_.Update(timeElapsed)
-        this.shoogaGlider_.Update(timeElapsed);
+      if (!this.loaded) {
+        this.water_.Update(timeElapsed, this.objSpeed)
+        this.soda_.Update(timeElapsed, this.objSpeed)
+        this.fruitDrink_.Update(timeElapsed, this.objSpeed)
+        this.shoogaGlider_.Update(timeElapsed, this.monSpeed, this.speedz, this.speedy);
+        this.hpbLogo_.Update(timeElapsed, this.objSpeed)
+        this.hpbWrongLogo1_.Update(timeElapsed, this.objSpeed)
+        this.hpbWrongLogo2_.Update(timeElapsed, this.objSpeed)
+
         this.loaded = true;
-        console.log("hi")
+
       }
       return;
     }
     this.player_.Update(timeElapsed);
     this.oilSlik_.Update(timeElapsed);
-    this.shoogaGlider_.Update(timeElapsed);
+    console.log(this.speedy)
+    this.shoogaGlider_.Update(timeElapsed, this.monSpeed, this.speedz, this.speedy);
     this.background_.Update(timeElapsed);
     this.progression_.Update(timeElapsed);
-    this.water_.Update(timeElapsed)
-    this.soda_.Update(timeElapsed)
-    this.fruitDrink_.Update(timeElapsed)
+    this.water_.Update(timeElapsed, this.objSpeed)
+    this.soda_.Update(timeElapsed, this.objSpeed)
+    this.fruitDrink_.Update(timeElapsed, this.objSpeed)
+    this.hpbLogo_.Update(timeElapsed, this.objSpeed)
+    this.hpbWrongLogo1_.Update(timeElapsed, this.objSpeed)
+    this.hpbWrongLogo2_.Update(timeElapsed, this.objSpeed)
+
+
+
+    this.player_.getSpeed(result => {
+      this.speed_ = result
+    });
 
     if (this.swipeLeft) {
       this.player_.SwipeLeft();

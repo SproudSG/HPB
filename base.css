@@ -149,6 +149,11 @@ html,body {
   position: relative;
 }
 
+#monster {
+  position: relative;
+  left: -30px
+}
+
 .end {
   float: right
 }

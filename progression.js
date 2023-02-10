@@ -15,8 +15,13 @@ export const progression = (() => {
 
             const scoreText = (Math.round((this.progress_ * 10) / 10)).toLocaleString(
                 'en-US', { minimumIntegerDigits: 5, useGrouping: false }) / 5;
-                
+
+
+            const scoreText1 = (Math.round((this.progress_ * 10) / 10)).toLocaleString(
+                'en-US', { minimumIntegerDigits: 5, useGrouping: false }) / 5;
             document.getElementById('runner').style.left = scoreText * 4.1 + 'px';
+            
+           document.getElementById('monster').style.left = scoreText1 * 4.1 + 'px';
 
             if (this.progress_ >= 500) {
                 document.dispatchEvent(new CustomEvent('score-over'));

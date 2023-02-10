@@ -17,7 +17,6 @@ export const player = (() => {
       this.sliding_ = false;
       this.slideAnimation_ = false;
       this.playerBox_ = new THREE.Box3();
-
       //water variables
       this.waterID = null;
       this.processedWaterIDs = [];
@@ -29,6 +28,20 @@ export const player = (() => {
       //fruit drink variables
       this.fruitID = null;
       this.processedFruitIDs = [];
+
+
+      //HPB box logo variables
+      this.box1ID = null;
+      this.processedbox1IDs = [];
+      this.box2ID = null;
+      this.processedbox2IDs = [];
+      this.box3ID = null;
+      this.processedbox3IDs = [];
+
+      //map speed
+      this.speed = 0.22
+      this.debuff = false;
+      this.buff = false;
 
       //sugarcrash variables
       this.stamina_ = 100;
@@ -157,6 +170,9 @@ export const player = (() => {
       const water = this.params_.water.GetColliders();
       const fruitDrink = this.params_.fruitDrink.GetColliders();
       const soda = this.params_.soda.GetColliders();
+      const box1 = this.params_.box1.GetColliders();
+      const box2 = this.params_.box2.GetColliders();
+      const box3 = this.params_.box3.GetColliders();
 
 
       this.playerBox_.setFromObject(this.mesh_);
@@ -200,11 +216,8 @@ export const player = (() => {
             this.stamina_ = newStamina;
             this.params_.soda.ToggleVisible();
             this.sugarDrinks++
-            if(this.sugarDrinks == 3) {
-              console.log(this.stamina_)
-              newStamina = this.stamina_/2
-              console.log(newStamina)
- 
+            if (this.sugarDrinks == 3) {
+              newStamina = this.stamina_ / 2
               this.stamina_ = newStamina;
               this.sugarDrinks = 0
             }
@@ -226,12 +239,8 @@ export const player = (() => {
             this.stamina_ = newStamina;
             this.params_.fruitDrink.ToggleVisible();
             this.sugarDrinks++
-            if(this.sugarDrinks == 3) {
-              console.log(this.stamina_)
-
-              newStamina = this.stamina_/2
-              console.log(newStamina)
-
+            if (this.sugarDrinks == 3) {
+              newStamina = this.stamina_ / 2
               this.stamina_ = newStamina;
               this.sugarDrinks = 0
             }
@@ -240,12 +249,70 @@ export const player = (() => {
           return;
         }
       }
+
+      //if player collides with right hpb logo
+      for (let c of box1) {
+
+        const cur = c.collider;
+        if (c.mesh) {
+          this.box1ID = c.mesh.uuid;
+          if (!this.processedbox1IDs.includes(this.box1ID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedWaterIDs.push(this.box1ID);
+
+            this.speed = 0.54
+            this.buff = true;
+            this.params_.box1.ToggleVisible();
+          }
+        } else {
+          return;
+        }
+      }
+
+      //if player collides with wrong box 1
+      for (let c of box2) {
+
+        const cur = c.collider;
+        if (c.mesh) {
+          this.box2ID = c.mesh.uuid;
+          if (!this.processedbox1IDs.includes(this.box2ID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedWaterIDs.push(this.box2ID);
+
+            this.speed = 0.1
+            this.debuff = true;
+            this.params_.box2.ToggleVisible();
+          }
+        } else {
+          return;
+        }
+      }
+
+      //if player collides with wrong box 2
+      for (let c of box3) {
+
+        const cur = c.collider;
+        if (c.mesh) {
+          this.box3ID = c.mesh.uuid;
+          if (!this.processedbox3IDs.includes(this.box3ID) && cur.intersectsBox(this.playerBox_)) {
+            this.processedWaterIDs.push(this.box3ID);
+
+            this.speed = 0.1
+
+            this.params_.box3.ToggleVisible();
+          }
+        } else {
+          return;
+        }
+      }
     }
 
+    getSpeed(callback) {
+      const result = this.speed;
+      callback(result);
+    }
 
     //player movement with swipe gestures
     SwipeLeft() {
-  
+
       if (this.position_.z <= 0) {
         this.position_.z = (Math.round(this.position_.z * 10) / 10) + this.leftMovementSpeed;
         if (this.position_.z <= -3) {
@@ -319,6 +386,28 @@ export const player = (() => {
 
 
     Update(timeElapsed) {
+      //check speed decay
+      if (this.buff) {
+        if (this.speed > 0.22) {
+          this.speed -= (timeElapsed / 10)
+        }
+        if (this.speed < 0.22) {
+          this.speed = 0.22
+          this.buff = false
+        }
+      }
+
+      if (this.debuff) {
+        if (this.speed > 0.22) {
+          this.speed = 0.22
+          this.debuff = false
+        }
+        if (this.speed < 0.22) {
+          this.speed += (timeElapsed)
+
+        }
+      }
+
       //player movement with keyboard controls
       if (this.keys_.space && this.position_.y == 0.0) {
         this.SwipeUp(timeElapsed)
@@ -369,6 +458,7 @@ export const player = (() => {
         this.inAir_ = false;
 
       }
+
       if (this.position_.y <= 0.0 && this.sliding_ == true) {
         if (this.position_.y == 0) {
           this.sliding_ = false

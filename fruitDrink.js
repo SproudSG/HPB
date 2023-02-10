@@ -25,7 +25,7 @@ export const fruitDrink = (() => {
 
       loader.load('drinks2.fbx', (fbx) => {
 
-        this.mesh = fbx.children[8];
+        this.mesh = fbx.children[9];
         this.params_.scene.add(this.mesh);
 
         fbx.traverse((child) => {
@@ -94,18 +94,18 @@ export const fruitDrink = (() => {
     }
 
 
-    Update(timeElapsed) {
+    Update(timeElapsed,speed) {
       this.SpawnObj_(this.params_.position, timeElapsed)
-      this.UpdateColliders_(timeElapsed);
+      this.UpdateColliders_(timeElapsed,speed);
 
     }
 
-    UpdateColliders_(timeElapsed) {
+    UpdateColliders_(timeElapsed,speed) {
       const invisible = [];
       const visible = [];
 
       for (let obj of this.objects_) {
-        obj.position.x -= timeElapsed * this.speed_;
+        obj.position.x -= timeElapsed * speed;
 
         if (obj.position.x < -20) {
           invisible.push(obj);

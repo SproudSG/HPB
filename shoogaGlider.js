@@ -98,7 +98,7 @@ export const shoogaGlider = (() => {
       this.progress_ += timeElapsed * 10.0;
 
 
-      const spawnPosition = [570, 1100, 1700 ]
+      const spawnPosition = [570, 1100, 1700]
 
       let obj = null;
 
@@ -115,14 +115,14 @@ export const shoogaGlider = (() => {
 
 
           //set shooga glider position abnd scale
-          obj.position.x = spawnPosition[i] + Math.random() 
+          obj.position.x = spawnPosition[i] + Math.random()
           obj.position.z = 0;
           obj.position.y = 100;
           obj.scale = 0.6;
 
           this.objects_.push(obj);
 
-    
+
           this.counter_++
 
         }
@@ -131,34 +131,36 @@ export const shoogaGlider = (() => {
     }
 
 
-    Update(timeElapsed) {
+    Update(timeElapsed, speed, speedz, speedy) {
       this.SpawnObj_(timeElapsed);
-      this.UpdateColliders_(timeElapsed);
+      this.UpdateColliders_(timeElapsed, speed, speedz, speedy);
     }
 
     //sets the speed of the spawned monsters
-    UpdateColliders_(timeElapsed) {
-      
+    UpdateColliders_(timeElapsed, speed, speedz, speedy) {
+
       const invisible = [];
       const visible = [];
 
       for (let obj of this.objects_) {
-        obj.position.x -= timeElapsed * this.speed_;
+        obj.position.x -= timeElapsed * speed;
 
-        obj.position.z -= timeElapsed * this.speedz_;
-        obj.position.y -= timeElapsed * this.speedy_;
 
         if (obj.position.z < -3 || obj.position.z > 3) {
-          this.speedz_ = -this.speedz_;
-          console.log(this.speedz_)
+          obj.position.z -= timeElapsed * -speedz;
+
+        }else{
+          obj.position.z -= timeElapsed * speedz;
 
         }
-        
+
         if (obj.position.y < 2) {
-          this.speedy_ = 0
+          obj.position.y = 2
+        } else {
+          obj.position.y -= timeElapsed * speedy;
 
         }
-        
+
         if (obj.position.x < -20) {
           invisible.push(obj);
           obj.mesh.visible = false;
