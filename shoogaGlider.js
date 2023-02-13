@@ -145,14 +145,14 @@ export const shoogaGlider = (() => {
       for (let obj of this.objects_) {
         obj.position.x -= timeElapsed * speed;
 
+        // console.log(obj.position.z)
+        // if (obj.position.z < -3 || obj.position.z > 3) {
+        //   obj.position.z -= timeElapsed * -speedz;
 
-        if (obj.position.z < -3 || obj.position.z > 3) {
-          obj.position.z -= timeElapsed * -speedz;
+        // }else{
+        //   obj.position.z -= timeElapsed * speedz;
 
-        }else{
-          obj.position.z -= timeElapsed * speedz;
-
-        }
+        // }
 
         if (obj.position.y < 2) {
           obj.position.y = 2

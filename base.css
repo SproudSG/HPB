@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 
-html,body {
+html,
+body {
   width: 100%;
   height: 100%;
   background: #000000;
@@ -104,6 +105,28 @@ html,body {
   font-size: 1em;
   color: white;
   text-shadow: 8px 8px black;
+}
+
+/* count down */
+
+.countdown-layout {
+  opacity: 0.0;
+
+  visibility: hidden;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.137);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.countdown-layout.active {
+  opacity: 1.0;
+  visibility: visible;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .score-text {
@@ -233,4 +256,39 @@ li {
 .play-color {
   color: rgb(250, 53, 53);
   font-weight: bold;
+}
+
+/* power up video */
+#video-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+#powerup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  animation: move 1s ease;
+  transform: translate(-50%, -50%);
+  transition: 1s;
+  width: 100%;
+}
+#powerdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  animation: move 1s ease;
+  transform: translate(-50%, -50%);
+  transition: 1s;
+  width: 100%;
+}
+
+@keyframes move {
+  0% { transform: translate(-50%, -200%); }
+  100% { transform: translate(-50%, -50%);}
 }

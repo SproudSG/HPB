@@ -31,6 +31,7 @@ export const player = (() => {
 
 
       //HPB box logo variables
+      this.box = "";
       this.box1ID = null;
       this.processedbox1IDs = [];
       this.box2ID = null;
@@ -135,6 +136,7 @@ export const player = (() => {
 
     }
 
+    //event listener for keyboard controls
     InitInput_() {
       this.keys_ = {
         left: false,
@@ -258,7 +260,7 @@ export const player = (() => {
           this.box1ID = c.mesh.uuid;
           if (!this.processedbox1IDs.includes(this.box1ID) && cur.intersectsBox(this.playerBox_)) {
             this.processedWaterIDs.push(this.box1ID);
-
+            this.box = "powerup"
             this.speed = 0.54
             this.buff = true;
             this.params_.box1.ToggleVisible();
@@ -276,8 +278,8 @@ export const player = (() => {
           this.box2ID = c.mesh.uuid;
           if (!this.processedbox1IDs.includes(this.box2ID) && cur.intersectsBox(this.playerBox_)) {
             this.processedWaterIDs.push(this.box2ID);
-
-            this.speed = 0.1
+            this.box = "powerdown"
+            this.speed = 0.05
             this.debuff = true;
             this.params_.box2.ToggleVisible();
           }
@@ -294,9 +296,9 @@ export const player = (() => {
           this.box3ID = c.mesh.uuid;
           if (!this.processedbox3IDs.includes(this.box3ID) && cur.intersectsBox(this.playerBox_)) {
             this.processedWaterIDs.push(this.box3ID);
-
-            this.speed = 0.1
-
+            this.box = "powerdown"
+            this.speed = 0.05
+            this.debuff = true;
             this.params_.box3.ToggleVisible();
           }
         } else {
@@ -305,9 +307,16 @@ export const player = (() => {
       }
     }
 
+    //send back callbacks for speed and collision
     getSpeed(callback) {
       const result = this.speed;
       callback(result);
+    }
+
+    getBoxCollide(callback) {
+      const result = this.box;
+      callback(result);
+      this.box = ""
     }
 
     //player movement with swipe gestures
@@ -385,28 +394,8 @@ export const player = (() => {
     }
 
 
-    Update(timeElapsed) {
-      //check speed decay
-      if (this.buff) {
-        if (this.speed > 0.22) {
-          this.speed -= (timeElapsed / 10)
-        }
-        if (this.speed < 0.22) {
-          this.speed = 0.22
-          this.buff = false
-        }
-      }
+    Update(timeElapsed, pause) {
 
-      if (this.debuff) {
-        if (this.speed > 0.22) {
-          this.speed = 0.22
-          this.debuff = false
-        }
-        if (this.speed < 0.22) {
-          this.speed += (timeElapsed)
-
-        }
-      }
 
       //player movement with keyboard controls
       if (this.keys_.space && this.position_.y == 0.0) {
@@ -473,20 +462,50 @@ export const player = (() => {
       }
 
       //update stamina
-      this.UpdateStamina_(timeElapsed);
+      this.UpdateStamina_(timeElapsed, pause);
+
+
+      if (!pause) {
+        //check speed decay
+        if (this.buff) {
+          if (this.speed > 0.22) {
+            this.speed -= (timeElapsed / 10)
+          }
+          if (this.speed < 0.22) {
+            this.speed = 0.22
+            this.buff = false
+          }
+        }
+
+        if (this.debuff) {
+          if (this.speed > 0.22) {
+            this.speed = 0.22
+            this.debuff = false
+          }
+          if (this.speed < 0.22) {
+            console.log(timeElapsed)
+            this.speed += (timeElapsed/10)
+
+          }
+        }
+      }
+
 
     }
 
     // Stamina
-    UpdateStamina_(timeElapsed) {
-      this.stamina_ -= timeElapsed * 5
-      const staminaText = (Math.round(this.stamina_ * 10) / 10).toLocaleString(
-        'en-US', { minimumIntegerDigits: 3, useGrouping: false });
+    UpdateStamina_(timeElapsed, pause) {
+      if (!pause) {
+        this.stamina_ -= timeElapsed * 5
+        const staminaText = (Math.round(this.stamina_ * 10) / 10).toLocaleString(
+          'en-US', { minimumIntegerDigits: 3, useGrouping: false });
 
-      document.getElementById("stamina").style.width = staminaText + "%"
-      if (this.stamina_ <= 0) {
-        this.gameOver = true
+        document.getElementById("stamina").style.width = staminaText + "%"
+        if (this.stamina_ <= 0) {
+          this.gameOver = true
+        }
       }
+
     }
   };
 

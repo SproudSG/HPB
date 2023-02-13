@@ -8,7 +8,7 @@ export const oilSlik = (() => {
     class OilSlik {
         constructor(params) {
             //player properties
-            this.position_ = new THREE.Vector3(-2, 0, 0);
+            this.position_ = new THREE.Vector3(-5, 0, 0);
             this.playerBox_ = new THREE.Box3();
             this.speed_ = 2;
 

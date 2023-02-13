@@ -130,6 +130,8 @@ return PCSS( shadowMap, shadowCoord );
 class BasicWorldDemo {
   constructor() {
     this.countdown_ = 6;
+    this.resumeCountdown_ = 3;
+    this.powerCountdown_ = false;
     this.loaded = false;
     this.intervalId_ = null;
     this._Initialize();
@@ -140,7 +142,7 @@ class BasicWorldDemo {
       this._playMenuMusic();
 
     });
-    document.getElementById('game-menu').onclick = (msg) => this._OnStart(msg);
+    document.getElementById('video-container').onclick = (msg) => this._OnStart(msg);
 
     // swipe gesture variables and event listeners
     this.swipeLeft = false;
@@ -155,7 +157,6 @@ class BasicWorldDemo {
     this.isSwiping = false;
     this.isPaused = false;
 
-
     document.addEventListener('touchstart', (event) => {
       this.handleTouchStart(event);
     }, { passive: false });
@@ -164,7 +165,35 @@ class BasicWorldDemo {
       this.handleTouchMove(event);
     }, { passive: false });
 
+    //power up 
+    this.playedVideo_ = false;
+    this.powerupVideo_ = document.getElementById("powerup");
+    this.powerdownVideo_ = document.getElementById("powerdown");
 
+    this.videoContainer = document.getElementById("video-container");
+    //  this.setupListeners();
+
+
+  }
+
+  playPowerupVideo() {
+    this.powerupVideo_.style.display = "block";
+    this.powerupVideo_.play();
+  }
+
+  closePowerupVideo() {
+    this.powerupVideo_.style.display = "none";
+    this.powerupVideo_.currentTime = 0;
+  }
+
+  playPowerdownVideo() {
+    this.powerdownVideo_.style.display = "block";
+    this.powerdownVideo_.play();
+  }
+
+  closePowerdownVideo() {
+    this.powerdownVideo_.style.display = "none";
+    this.powerdownVideo_.currentTime = 0;
   }
 
   _playMenuMusic() {
@@ -221,11 +250,15 @@ class BasicWorldDemo {
 
   _Initialize() {
     //speed
-    this.speed_ = 0.22
-    this.objSpeed = 12
-    this.monSpeed = 52
-    this.speedz = 6
-    this.speedy = 12
+    this.speed_ = 0.22;
+    this.box_ = "";
+    this.objSpeed = 12;
+    this.monSpeed = 52;
+    this.speedz = 3;
+    this.speedy = 12;
+    this.animationId;
+    this.buffspeed = false;
+
 
     // overwrite shadowmap code
     let shadowCode = THREE.ShaderChunk.shadowmap_pars_fragment;
@@ -316,28 +349,41 @@ class BasicWorldDemo {
 
       this.mesh = fbx;
       this.scene_.add(this.mesh);
-      let animationId;
-      let animationStarted = false;
 
       //key down event listener
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
           if (this.isPaused) {
-            animationId = requestAnimationFrame(animate);
+            this.animationId = requestAnimationFrame(animate);
+
             this.objSpeed = 12
             this.monSpeed = 52
             this.speedy = 12
-            this.speedz = 6
+            this.speedz = 3
             this.isPaused = false;
           } else {
             this.objSpeed = 0
             this.monSpeed = 0
             this.speedy = 0
             this.speedz = 0
-            cancelAnimationFrame(animationId);
+            cancelAnimationFrame(this.animationId);
             this.isPaused = true;
           }
         }
+      });
+
+      // if power up video ends, then unpause everything
+      this.powerupVideo_.addEventListener("ended", () => {
+        this.closePowerupVideo();
+        this.powerCountdown_ = true
+
+      });
+
+      // if power down video ends, then unpause everything
+      this.powerdownVideo_.addEventListener("ended", () => {
+        this.closePowerdownVideo();
+        this.powerCountdown_ = true
+
       });
 
       const animate = () => {
@@ -346,19 +392,57 @@ class BasicWorldDemo {
           this.mesh.position.x -= speed;
         }
         if (this.gameOver_) {
-          cancelAnimationFrame(animationId);
+          cancelAnimationFrame(this.animationId);
           return;
         }
-        animationId = requestAnimationFrame(animate);
+        this.animationId = requestAnimationFrame(animate);
       }
 
       animate();
       setInterval(() => {
         if (this.gameOver_) {
-          cancelAnimationFrame(animationId);
-          animationStarted = false;
+          cancelAnimationFrame(this.animationId);
+        } else if (this.powerCountdown_) {
+          //check if power up video is done playing then executes this
+          startCountdown();
+          this.powerCountdown_ = false;
         }
+
       }, 10);
+
+      //count down after power up video has been played
+      const startCountdown = () => {
+        document.getElementById('countdown').classList.toggle('active');
+        this.intervalId_ = setInterval(() => {
+          this.resumeCountdown_--;
+          document.getElementById('power-countdown-text').textContent = this.resumeCountdown_;
+          if (this.resumeCountdown_ === 0) {
+            this.animationId = requestAnimationFrame(animate);
+            this.objSpeed = 12
+            this.monSpeed = 52
+            this.speedy = 12
+            this.speedz = 3
+            this.isPaused = false;
+            clearInterval(this.intervalId_);
+            document.getElementById('countdown').classList.toggle('active');
+
+            // Start another countdown
+            let newCountdown = 5;
+            let newIntervalId = setInterval(() => {
+              newCountdown--;
+              if (newCountdown === 0) {
+                clearInterval(newIntervalId);
+                if (this.box_ == "") {
+                  this.playedVideo_ = false
+                  document.getElementById('power-countdown-text').textContent = 3;
+                  this.resumeCountdown_ = 3;
+                }
+
+              }
+            }, 1000);
+          }
+        }, 1000)
+      }
     });
 
     const uniforms = {
@@ -427,7 +511,7 @@ class BasicWorldDemo {
       arrLogo3.push(value3 * 3);
     }
 
-
+    //initiate all the game objects
     this.shoogaGlider_ = new shoogaGlider.ShoogaGliderManager({ scene: this.scene_ });
     this.water_ = new water.DrinksManager({ scene: this.scene_, position: arrDrinks1 })
     this.soda_ = new soda.DrinksManager({ scene: this.scene_, position: arrDrinks2 })
@@ -442,11 +526,22 @@ class BasicWorldDemo {
     this.progression_ = new progression.ProgressionManager();
 
     this.gameOver_ = false;
-    this.isPaused_ = false;
     this.previousRAF_ = null;
     this.RAF_();
     this.OnWindowResize_();
 
+
+  }
+
+  //pause all moving objects
+  Pause() {
+
+    this.objSpeed = 0
+    this.monSpeed = 0
+    this.speedy = 0
+    this.speedz = 0
+    cancelAnimationFrame(this.animationId);
+    this.isPaused = true;
   }
 
   OnWindowResize_() {
@@ -460,16 +555,16 @@ class BasicWorldDemo {
       if (this.previousRAF_ === null) {
         this.previousRAF_ = t;
       }
-
       this.RAF_();
-
-      this.Step_((t - this.previousRAF_) / 1000.0);
+      this.Step_((t - this.previousRAF_) / 1000.0, this.isPaused);
       this.threejs_.render(this.scene_, this.camera_);
       this.previousRAF_ = t;
     });
   }
 
-  Step_(timeElapsed) {
+  Step_(timeElapsed, pause) {
+
+    //if game is won
     if (!this.eventAdded) {
       document.addEventListener('score-over', () => {
         this.gameOver_ = true;
@@ -500,12 +595,11 @@ class BasicWorldDemo {
       }
       return;
     }
-    this.player_.Update(timeElapsed);
+    this.player_.Update(timeElapsed, pause);
     this.oilSlik_.Update(timeElapsed);
-    console.log(this.speedy)
     this.shoogaGlider_.Update(timeElapsed, this.monSpeed, this.speedz, this.speedy);
     this.background_.Update(timeElapsed);
-    this.progression_.Update(timeElapsed);
+    this.progression_.Update(timeElapsed, pause, this.buffspeed, this.speed_);
     this.water_.Update(timeElapsed, this.objSpeed)
     this.soda_.Update(timeElapsed, this.objSpeed)
     this.fruitDrink_.Update(timeElapsed, this.objSpeed)
@@ -514,11 +608,41 @@ class BasicWorldDemo {
     this.hpbWrongLogo2_.Update(timeElapsed, this.objSpeed)
 
 
-
+    //get speed of player from player.js
     this.player_.getSpeed(result => {
       this.speed_ = result
+      //if speed is not default, meaning the player has a speed buff/debuff
+      if (this.speed_ != 0.22 && !pause) {
+        this.objSpeed = 12 * (this.speed_ / 0.22)
+        this.buffspeed = true;
+
+      } else {
+        this.buffspeed = false;
+
+      }
     });
 
+    //checks whether player collides with box from player.js
+    this.player_.getBoxCollide(result => {
+      this.box_ = result
+
+      if (this.box_ == "powerup" && !this.playedVideo_) {
+        this.box_ = ""
+        this.playedVideo_ = true;
+        this.Pause()
+        this.playPowerupVideo()
+      } else if (this.box_ == "powerdown" && !this.playedVideo_) {
+        this.box_ = ""
+        this.playedVideo_ = true;
+        this.Pause()
+        this.playPowerdownVideo()
+
+      }
+
+
+    });
+
+    //checks for swipe gestures
     if (this.swipeLeft) {
       this.player_.SwipeLeft();
       this.isSwiping = true
@@ -550,6 +674,7 @@ class BasicWorldDemo {
       this.swipeDown = false;
     }
 
+    //if game is over (lost)
     if (this.player_.gameOver && !this.gameOver_) {
       this.gameOver_ = true;
       document.getElementById('game-over').classList.toggle('active');
